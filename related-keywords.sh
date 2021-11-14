@@ -1,11 +1,15 @@
 #!/bin/bash
+# Scrapes youtube to find keywords often used with the input arguments
 
+# Separate arguments in `$*` with '+'|sed -r '/^.{,5}$/d'
 IFS=+
 
+# Get search recommendations for the input
 TEXT=$(curl -s "https://suggestqueries-clients6.youtube.com/complete/search?client=youtube&q=$*&xhr=t"|jq .[1][][0])
 
+# Loop through recommended videos
 while read VIDEO
-# Get the page ov the video
+# Get the page of the video
 do VIDEO=$(curl -s https://www.youtube.com/watch?v=$VIDEO)
 
 # Get video title, tags and description;
