@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Tells you pornhub titles in a text-to-speech voice every now and then
+
+# Ignore this horror
+voice_types=({,fe}male{{1..3},_child})
+
+while true
+do
+  # If we ran through all titles (or it's the first run)
+  if [ -z "$titles" ]
+  then
+    titles=`curl -s https://www.pornhub.com{,/gayporn} \
+      | grep -Po '(?<=^ {20}alt=").*?(?="$)' \
+      | sed "s/&amp;/\&/g; s/&quot;/\"/g; s/&#039;/'/"`
+    # sed unescapes html&quot;s escape sequences
+  fi
+
+  # Pick a line
+  index=`shuf -i1-$(echo "$titles" | wc -l) -n1`
+
+  # Say the chosen line, with a random voice
+  echo "$titles" | sed $index'q;d' | spd-say -et ${voice_types[`shuf -i0-7 -n1`]}
+  # Remove the line from the list
+  titles=`echo "$titles" | sed $index'd'`
+
+  # Wait for a bit
+  # You can change the time to wait, this is from 16-64 seconds inclusive
+  sleep `shuf -i16-64 -n1`
+done
