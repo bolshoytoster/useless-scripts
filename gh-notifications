@@ -11,27 +11,33 @@ PASSWORD=yourPassword
 DELAY=300
 
 
-since=`date +%s`
+since=`date -d"$(last -x shutdown | grep -Pom1 '(?<=4  ).+(?= -)')" +%s`
 
 login=`curl -is https://github.com/login`
 
-_gh_sess=`echo $login | grep -Po '_gh.*?;'`
-authenticity_token=`echo $login | grep -Po '(?<=n" value=").*?(?=")'`
+_gh_sess=`echo $login | grep -Po '_gh.+?;'`
+authenticity_token=`echo $login | grep -Po '(?<=n" value=").{86}'`
 
 user_session=`curl https://github.com/session \
 	-isX POST \
 	-H "Cookie: $_gh_sess" \
 	--data-raw "authenticity_token=$authenticity_token&login=$USERNAME&password=$PASSWORD" \
-	| grep -Po 'user_session=.*?;'`
+	| grep -Po 'user_session=.{48}'`
 
 while true;
 do
-	sleep $DELAY
+	recent=`curl -sH "Cookie: $user_session" https://github.com/notifications/beta/recent_notifications_alert?since=$since \
+		| grep -Po '(10)?[1-9] new notifications?'`
 
-	recent=`curl -sH "Cookie: $user_session" https://github.com/notifications/beta/recent_notifications_alert?since=$since | grep -Po '(10)?. new notifications?'`
 	if [ -n "$recent" ]
 	then
-		spd-say "$recent"
+		espeak-ng "$recent"
 		since=`date +%s`
 	fi
+	
+	sleep $DELAY
+	until [ "`cat /proc/acpi/button/lid/LID0/state" = 'state:      open' ]
+	do
+		sleep $DELAY
+	until
 done
