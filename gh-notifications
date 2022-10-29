@@ -7,7 +7,7 @@ USERNAME=yourUsername
 PASSWORD=yourPassword
 
 # How often to check (seconds)
-# I reccomend 5 mins, with 1 min I got rate limited
+# I recommend 5 mins, with 1 min I got rate limited
 DELAY=300
 
 
